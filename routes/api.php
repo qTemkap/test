@@ -2,28 +2,51 @@
 
 use Illuminate\Http\Request;
 
-Route::group(['middleware' => 'role:manager'], function() {
+/*
+|--------------------------------------------------------------------------
+| API Routes
+|--------------------------------------------------------------------------
+|
+| Here is where you can register API routes for your application. These
+| routes are loaded by the RouteServiceProvider within a group which
+| is assigned the "api" middleware group. Enjoy building your API!
+|
+*/
 
-	Route::post('/products', 'ProductsController@store');
-	Route::delete('/products/{id}', 'ProductsController@destroy');
+Route::middleware('export')->group(function() {
 
-	Route::post('/orders', 'OrdersController@store');
+    Route::prefix('employees')->group(function() {
 
-	Route::post('/products/{id}/comments', 'CommentsProductsController@store');
-	Route::get('/products/{id}/comments', 'CommentsProductsController@index');
+        Route::get('/', 'EmployeesController@index');
 
-	Route::put('/products/comments/{id}/set-status', 'StatusCommentsController@index');
+        Route::get('/{user}', 'EmployeesController@get');
 
-	Route::put('/products/{id}/cover-image', 'ProductCoverImageController@update');
+    });
 
-	Route::post('/products/{id}/wishlist', 'WishlistController@store');
+    Route::prefix('objects')->group(function (){
 
-	Route::prefix('/products/{id}/buy/')->group(function() {
-		Route::post('/apple-store', 'AppleStoreController@store');
+        Route::get('/{type?}','ObjectsController@index');
 
-		Route::post('/stripe', 'StripeController@store');
+        Route::get('/{type}/{id}','ObjectsController@get');
 
-		Route::post('/pay-pal', 'PayPalController@store');
-	});
-	
+    });
+
+    Route::prefix('orders')->group(function (){
+
+        Route::get('/{type?}','OrdersController@index');
+
+    });
+    Route::prefix('house-catalog')->group(function (){
+
+        Route::get('/','HousesCatalogController@index');
+
+    });
+
+    Route::prefix('webhook')->group(function (){
+
+        Route::post('/','WebhookController@register');
+
+    });
 });
+
+Route::post('webhook/test-listener','WebhookController@testListener');
